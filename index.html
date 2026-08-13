@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess AI - The Undefeated</title>
+    <meta name="description" content="Play chess against The Undefeated, a free grandmaster-level chess engine powered by Stockfish. Adjustable strength, play as white or black, with a timer.">
+    <meta name="keywords" content="chess, chess ai, chess engine, play chess online, stockfish, free chess">
+    <meta property="og:title" content="Chess AI - The Undefeated">
+    <meta property="og:description" content="Play chess against a grandmaster-level Stockfish engine. Free, no signup, works on mobile.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8F%86%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css?v=11">
+</head>
+<body>
+    <div class="bg" aria-hidden="true">
+        <div class="bg-layer bg-nebula"></div>
+        <div class="bg-layer bg-stars-far"></div>
+        <div class="bg-layer bg-stars-mid"></div>
+        <div class="bg-layer bg-stars-near"></div>
+        <div class="bg-vignette"></div>
+    </div>
+    <div class="container">
+        <header>
+            <h1>THE UNDEFEATED</h1>
+            <p class="subtitle">Grandmaster-level chess engine</p>
+            <div class="online-badge" id="online-badge" title="Players currently playing">
+                <span class="online-dot"></span>
+                <span id="online-count">--</span> playing now
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="board-wrap">
+                <div id="board"></div>
+                <div id="status" class="status"></div>
+            </div>
+
+            <aside class="side-panel">
+                <div class="color-banner" id="color-banner"></div>
+                <div class="controls">
+                    <h3>Game Controls</h3>
+                    <button id="start-btn" class="btn btn-start">START MATCH</button>
+                    <button id="new-game" class="btn">NEW GAME</button>
+                    <button id="analysis-btn" class="btn">GAME ANALYSIS</button>
+                    <button id="pro-analysis-btn" class="btn">PRO ANALYSIS</button>
+                    <button id="forfeit" class="btn btn-danger">FOREFIT</button>
+                    <label class="side-label">
+                        Play as
+                        <select id="side-select">
+                            <option value="w" selected>WHITE</option>
+                            <option value="b">BLACK</option>
+                        </select>
+                    </label>
+                    <label class="side-label">
+                        Strength
+                        <select id="strength-select">
+                            <option value="2">EASY</option>
+                            <option value="6">MEDIUM</option>
+                            <option value="12">HARD</option>
+                            <option value="20" selected>MAXIMUM (UNBEATABLE)</option>
+                        </select>
+                    </label>
+                    <label class="side-label">
+                        Clock
+                        <select id="time-select">
+                            <option value="5">5 MIN</option>
+                            <option value="10">10 MIN</option>
+                            <option value="15" selected>15 MIN</option>
+                            <option value="30">30 MIN</option>
+                            <option value="60">1 HOUR</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="clocks">
+                    <div class="clock" id="clock-w"><span class="clock-tag">WHITE</span><span class="clock-time" id="time-w">15:00</span></div>
+                    <div class="clock" id="clock-b"><span class="clock-tag">BLACK</span><span class="clock-time" id="time-b">15:00</span></div>
+                </div>
+
+                <div class="engine-info">
+                    <h3>ENGINE ANALYSES</h3>
+                    <div id="eval" class="eval">THINKING...</div>
+                    <div id="depth" class="depth">DEPTH: 0</div>
+                </div>
+
+                <div class="advanced-analysis">
+                    <h3>PRO ANALYSIS</h3>
+                    <button id="advanced-btn" class="btn btn-pro">ADVANCED GAME ANALYSIS</button>
+                </div>
+
+                <div class="moves-panel">
+                    <h3>Move History</h3>
+                    <div id="moves" class="moves"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="promotion-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Promote your pawn</h3>
+            <div class="promo-pieces" id="promo-pieces"></div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module" src="app.js?v=11"></script>
+    <script type="module" src="pro-review.js"></script>
+    <script src="counter.js"></script>
+</body>
+</html>

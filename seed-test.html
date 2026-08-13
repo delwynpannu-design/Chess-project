@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pro-seed-test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="lock-notice hidden" id="lock-notice">lock</div>
+    <div class="game-area hidden" id="review-area">
+        <div class="board-wrap">
+            <div id="board" class="review-board"></div>
+            <div id="status" class="status"></div>
+        </div>
+        <aside class="side-panel">
+            <div class="nav-panel"><h3>Nav</h3><div class="nav-controls">
+                <button id="to-start">|&lt;</button><button id="prev">&lt;</button>
+                <span id="move-counter">0/0</span><button id="next">&gt;</button><button id="to-end">&gt;|</button>
+            </div></div>
+            <div class="engine-info review-verdict"><h3>SAYS</h3>
+                <div id="verdict-symbol"></div><div id="verdict-title"></div><div id="verdict-desc"></div>
+            </div>
+            <div class="moves-panel"><h3>Moves</h3><div id="moves" class="moves review-moves"></div></div>
+        </aside>
+    </div>
+    <div id="progress-overlay" class="progress-overlay"><div class="progress-card">
+        <p id="progress-text">Analyzing...</p><div class="progress-bar"><div id="progress-fill"></div></div>
+    </div></div>
+
+    <script src="config.js"></script>
+    <script type="module">
+        import { Chess } from './vendor/chess.js';
+        const g = new Chess();
+        const moves = ['e4', 'e5', 'Qh5', 'Nc6', 'Bc4', 'Nf6', 'Qxf7#'];
+        for (const m of moves) g.move(m);
+        localStorage.setItem('chess_analysis', JSON.stringify({ moves, status: 'Checkmate! White wins.' }));
+    </script>
+    <script type="module" src="pro-analysis.js"></script>
+</body>
+</html>

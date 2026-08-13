@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Analysis - Chess AI</title>
+    <meta name="description" content="Deep game review with engine evaluation, best-move arrows and move-by-move quality marks.">
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+    <div class="bg" aria-hidden="true">
+        <div class="bg-layer bg-nebula"></div>
+        <div class="bg-layer bg-stars-far"></div>
+        <div class="bg-layer bg-stars-mid"></div>
+        <div class="bg-layer bg-stars-near"></div>
+        <div class="bg-vignette"></div>
+    </div>
+    <div class="container">
+        <header>
+            <h1>PRO ANALYSIS</h1>
+            <p class="subtitle">Engine-reviewed moves, best moves and evaluation</p>
+        </header>
+
+        <div class="game-area">
+            <div class="board-wrap">
+                <div class="pro-board-wrap">
+                    <div id="board"></div>
+                    <div class="eval-bar" aria-hidden="true">
+                        <div class="eval-bar-marker"></div>
+                        <div id="eval-bar-white" class="eval-bar-white"></div>
+                    </div>
+                </div>
+                <div id="status" class="status"></div>
+            </div>
+
+            <aside class="side-panel">
+                <div class="controls">
+                    <a href="index.html" class="btn">BACK TO GAME</a>
+                </div>
+
+                <div class="nav-panel">
+                    <h3>Review</h3>
+                    <div class="nav-controls">
+                        <button id="to-start" class="nav-btn" title="Go to start">&#9198;</button>
+                        <button id="prev" class="nav-btn" title="Previous move">&#9664;</button>
+                        <span id="move-counter" class="move-counter">Move 0 / 0</span>
+                        <button id="next" class="nav-btn" title="Next move">&#9654;</button>
+                        <button id="to-end" class="nav-btn" title="Go to end">&#9197;</button>
+                    </div>
+                    <div id="verdict" class="verdict"></div>
+                </div>
+
+                <div class="moves-panel">
+                    <h3>Move List</h3>
+                    <div id="moves" class="moves"></div>
+                    <div class="legend">Green=best/great &middot; Yellow=inaccuracy &middot; Orange=mistake &middot; Red=blunder</div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="progress-overlay" class="progress-overlay hidden">
+        <div class="progress-box">
+            <h3>Analyzing game</h3>
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+            <span id="progress-text" class="progress-text">0 / 0</span>
+        </div>
+    </div>
+
+    <script type="module" src="pro-analysis.js"></script>
+</body>
+</html>

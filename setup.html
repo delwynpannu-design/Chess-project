@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess AI - Setup</title>
+    <style>
+        body { background: #0f0f0f; color: #eee; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: #181818; border: 1px solid #2a2a2a; border-radius: 12px; padding: 32px; width: 100%; max-width: 480px; }
+        h1 { font-size: 1.2rem; margin-bottom: 8px; }
+        p { color: #b8b8b8; font-size: 0.9rem; margin-bottom: 16px; }
+        label { display: block; font-size: 0.85rem; color: #b8b8b8; margin: 12px 0 4px; }
+        input { width: 100%; background: #141414; color: #eee; border: 1px solid #2a2a2a; border-radius: 6px; padding: 10px; font-size: 1rem; box-sizing: border-box; }
+        button { width: 100%; margin-top: 20px; background: #10b981; color: #111; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        #msg { margin-top: 12px; font-size: 0.9rem; }
+        .ok { color: #4ade80; }
+        .err { color: #f87171; }
+        details { margin-top: 16px; font-size: 0.85rem; color: #888; }
+        ol { margin: 8px 0 0 18px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Connect your online counter</h1>
+        <p>Paste the two values from your Supabase project's <b>Project Settings &rarr; API</b> page, then click Save. They are free and public.</p>
+
+        <label for="url">Project URL</label>
+        <input id="url" placeholder="https://abcd1234.supabase.co">
+
+        <label for="key">anon / public key</label>
+        <input id="key" placeholder="eyJhbGciOiJIUzI1NiIs...">
+
+        <button onclick="save()">SAVE</button>
+        <div id="msg"></div>
+
+        <details>
+            <summary>Where do I find these?</summary>
+            <ol>
+                <li>Go to your project on supabase.com</li>
+                <li>Click <b>Project Settings</b> (gear icon) in the sidebar</li>
+                <li>Click <b>API</b></li>
+                <li>Copy the <b>Project URL</b> into the first box</li>
+                <li>Copy the <b>anon public</b> key into the second box</li>
+            </ol>
+        </details>
+    </div>
+
+    <script>
+        async function save() {
+            const msg = document.getElementById('msg');
+            const url = document.getElementById('url').value.trim();
+            const key = document.getElementById('key').value.trim();
+            msg.className = '';
+            msg.textContent = 'Saving...';
+            try {
+                const r = await fetch('/api/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ SUPABASE_URL: url, SUPABASE_KEY: key })
+                });
+                const j = await r.json();
+                if (j.ok) {
+                    msg.className = 'ok';
+                    msg.textContent = 'Saved! Close this tab and reload the chess game - you should see a live count.';
+                } else {
+                    msg.className = 'err';
+                    msg.textContent = 'Error: ' + (j.error || 'unknown');
+                }
+            } catch (e) {
+                msg.className = 'err';
+                msg.textContent = 'Could not reach the server. Make sure node server.js is running.';
+            }
+        }
+    </script>
+</body>
+</html>
