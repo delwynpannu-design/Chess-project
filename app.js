@@ -10,6 +10,11 @@ let playerColor = 'w';
 // `playerColor` on every reset so move ordering (white first) never relies on a
 // stale local calculation inside an async callback.
 let engineColor = 'b';
+// Every new game gets a fresh epoch. Engine replies are only accepted when they
+// belong to the CURRENT game, so a leftover 'bestmove' from a previous game can
+// never be applied - even if the position happens to be identical.
+let gameEpoch = 0;
+let engineExpectedEpoch = -1;
 let strength = '20';
 let selected = null;
 let legalTargets = [];
@@ -189,6 +194,7 @@ function askEngineMove() {
         setTimeout(askEngineMove, 200);
         return;
     }
+    engineExpectedEpoch = gameEpoch;
     thinking = true;
     statusEl.textContent = 'The Undefeated is thinking...';
     statusEl.className = 'status';
@@ -197,22 +203,38 @@ function askEngineMove() {
     engine.postMessage('go movetime ' + STRENGTH_TIME[strength]);
 }
 
+// chess.js throws on an invalid move object, so a rogue/stale engine reply must
+// never be allowed to crash the app - apply moves defensively.
+function tryApplyMove(move) {
+    try {
+        return !!game.move(move);
+    } catch (e) {
+        return false;
+    }
+}
+
 function makeEngineMove(moveStr) {
     thinking = false;
     // Discard stale engine responses. A 'bestmove' may arrive late (e.g. from a
     // previous game's search after Reset). Apply it ONLY if the board is still
-    // exactly the position we asked the engine to analyze AND it really is the
-    // engine's turn. Because `engineColor` always mirrors the human's chosen
-    // side, an engine reply can never be dropped in when the human is White at
-    // move 1 (i.e. the engine can never "move first" for the human).
-    if (!gameStarted || game.turn() !== engineColor || game.fen() !== lastFen) return;
+    // exactly the position we asked the engine to analyze, it really is the
+    // engine's turn, and the reply belongs to the current game. Because
+    // `engineColor` always mirrors the human's chosen side, an engine reply can
+    // never be dropped in when the human is White at move 1 (i.e. the engine can
+    // never "move first" for the human).
+    if (!gameStarted || game.turn() !== engineColor || game.fen() !== lastFen || engineExpectedEpoch !== gameEpoch) return;
     const move = { from: moveStr.slice(0, 2), to: moveStr.slice(2, 4), promotion: moveStr.length > 4 ? moveStr[4] : undefined };
-    if (!game.move(move)) return;
+    if (!tryApplyMove(move)) return;
     lastFen = '';
+    engineExpectedEpoch = -1;
     render();
     checkEnd();
     saveAnalysis();
     onTurnChange();
+}
+
+function moveSucceeded(from, to, promotion) {
+    return tryApplyMove({ from, to, promotion: promotion || undefined });
 }
 
 // ---- Board rendering ----
@@ -332,7 +354,7 @@ function makePlayerMove(from, to) {
         return;
     }
 
-    game.move({ from, to });
+    if (!moveSucceeded(from, to)) return;
     selected = null;
     legalTargets = [];
     render();
@@ -353,7 +375,7 @@ function showPromoModal(from, to) {
         btn.appendChild(span);
         btn.addEventListener('click', () => {
             promoModal.classList.add('hidden');
-            game.move({ from, to, promotion: piece });
+            if (!moveSucceeded(from, to, piece)) return;
             selected = null;
             legalTargets = [];
             render();
@@ -430,6 +452,8 @@ function resetGame() {
     gameOver = false;
     gameStarted = false;
     thinking = false;
+    gameEpoch++;
+    engineExpectedEpoch = -1;
     evalEl.textContent = '0.00';
     depthEl.textContent = 'Depth: 0';
     playerColor = sideSelect.value;
