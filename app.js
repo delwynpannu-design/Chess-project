@@ -6,6 +6,10 @@ const game = new Chess();
 window.__chessGame = game;
 
 let playerColor = 'w';
+// The engine always plays the opposite side of the human. Kept in sync with
+// `playerColor` on every reset so move ordering (white first) never relies on a
+// stale local calculation inside an async callback.
+let engineColor = 'b';
 let strength = '20';
 let selected = null;
 let legalTargets = [];
@@ -176,6 +180,11 @@ function handleEngineOutput(line) {
 }
 
 function askEngineMove() {
+    // Only ever ask the engine when it genuinely is the engine's turn. This
+    // blocks a stale/scheduled call (left over from a previous game) from
+    // posting a search in a fresh game - e.g. it can no longer make the engine
+    // "move first" when the human is White.
+    if (gameOver || !gameStarted || game.turn() !== engineColor) return;
     if (!engineReady) {
         setTimeout(askEngineMove, 200);
         return;
@@ -192,12 +201,14 @@ function makeEngineMove(moveStr) {
     thinking = false;
     // Discard stale engine responses. A 'bestmove' may arrive late (e.g. from a
     // previous game's search after Reset). Apply it ONLY if the board is still
-    // exactly the position we asked the engine to analyze and it really is the
-    // engine's turn - otherwise a leftover Black reply could be dropped into the
-    // game and let Black "move first" even when the human is White.
-    if (!gameStarted || game.turn() === playerColor || game.fen() !== lastFen) return;
+    // exactly the position we asked the engine to analyze AND it really is the
+    // engine's turn. Because `engineColor` always mirrors the human's chosen
+    // side, an engine reply can never be dropped in when the human is White at
+    // move 1 (i.e. the engine can never "move first" for the human).
+    if (!gameStarted || game.turn() !== engineColor || game.fen() !== lastFen) return;
     const move = { from: moveStr.slice(0, 2), to: moveStr.slice(2, 4), promotion: moveStr.length > 4 ? moveStr[4] : undefined };
-    game.move(move);
+    if (!game.move(move)) return;
+    lastFen = '';
     render();
     checkEnd();
     saveAnalysis();
@@ -234,8 +245,8 @@ function render() {
             const piece = squares[row][col];
             if (piece) {
                 const span = document.createElement('span');
+                span.className = 'piece';
                 span.textContent = PIECE_CHARS[piece.color][piece.type];
-                span.style.fontSize = 'clamp(28px, 7.5cqw, 52px)';
                 span.style.lineHeight = '1';
                 span.style.pointerEvents = 'none';
                 if (piece.color === 'w') {
@@ -432,6 +443,7 @@ function resetGame() {
     evalEl.textContent = '0.00';
     depthEl.textContent = 'Depth: 0';
     playerColor = sideSelect.value;
+    engineColor = playerColor === 'w' ? 'b' : 'w';
     strength = strengthSelect.value;
     whiteMs = parseInt(timeSelect.value) * 60000;
     blackMs = whiteMs;
@@ -440,6 +452,11 @@ function resetGame() {
     lastTick = Date.now();
     renderClock();
     renderColorBanner();
+    // Kill any in-flight engine search and forget the position it was analysing,
+    // so a leftover 'bestmove' from a previous game can never be applied to the
+    // fresh board (this is what used to let Black/White "move first" wrongly).
+    lastFen = '';
+    engine.postMessage('stop');
     engine.postMessage('ucinewgame');
     engine.postMessage('setoption name Skill Level value ' + strength);
     render();
@@ -468,9 +485,6 @@ startBtn.addEventListener('click', () => {
 
     gameStarted = true;
 
-    // The engine always plays the opposite side of the human.
-    const engineColor = playerColor === 'w' ? 'b' : 'w';
-
     // White always moves first (chess rule). Switch the clock to whoever is to
     // move (at a fresh game that is White), then start ticking.
     onTurnChange();
@@ -482,7 +496,8 @@ startBtn.addEventListener('click', () => {
         statusEl.className = 'status';
         setTimeout(askEngineMove, 400);
     } else {
-        // The human is White -> the human makes the first move.
+        // The human is White -> the human makes the first move. The engine is
+        // never asked, so White's first move is always the human's.
         statusEl.textContent = 'White (you) moves first. Make your move.';
         statusEl.className = 'status';
     }

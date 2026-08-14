@@ -43,8 +43,8 @@ import { Chess } from './vendor/chess.js';
                 const piece = squares[row][col];
                 if (piece) {
                     const span = document.createElement('span');
+                    span.className = 'piece';
                     span.textContent = PIECE_CHARS[piece.color][piece.type];
-                    span.style.fontSize = 'clamp(28px, 7.5cqw, 52px)';
                     span.style.lineHeight = '1';
                     span.style.pointerEvents = 'none';
                     if (piece.color === 'w') {
