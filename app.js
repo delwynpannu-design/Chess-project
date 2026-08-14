@@ -370,16 +370,6 @@ function isPlayerTurn() {
     return game.turn() === playerColor;
 }
 
-// Visible banner so the player always knows the code's side assignment.
-function renderColorBanner() {
-    const el = document.getElementById('color-banner');
-    if (!el) return;
-    const engineColor = playerColor === 'w' ? 'b' : 'w';
-    el.innerHTML =
-        'YOU: <b>' + (playerColor === 'w' ? 'WHITE' : 'BLACK') + '</b> &nbsp;|&nbsp; ENGINE: <b>' +
-        (engineColor === 'w' ? 'WHITE' : 'BLACK') + '</b><br><small>White always moves first &middot; v11</small>';
-}
-
 // ---- Game flow ----
 function checkEnd() {
     if (game.isCheckmate()) {
@@ -451,7 +441,6 @@ function resetGame() {
     runningClock = null;
     lastTick = Date.now();
     renderClock();
-    renderColorBanner();
     // Kill any in-flight engine search and forget the position it was analysing,
     // so a leftover 'bestmove' from a previous game can never be applied to the
     // fresh board (this is what used to let Black/White "move first" wrongly).
